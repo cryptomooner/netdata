@@ -77,16 +77,17 @@ class Service(LogService):
 		for line in tail("-n 500", self.log_path, _iter=True):
 			if "Received block" in line or "Produced block" in line:
 				match = re.match( r'.*info  (.*) thread.* signed by (.*) \[.*', line)
-				info = {'date': match.group(1), 'producer': match.group(2) }
-				date = parse(info["date"])
-				offset = -self.configuration.get('timezone_offset') * 3600 if self.configuration.get('timezone_offset') else 0
-				date = date+relativedelta(seconds=offset)
-			    	#pdb.set_trace()			
-				# filtering entries for the last 126 seconds
-				if date > last and date < now or date == now:
-					search.append(info)
-					if info['producer'] == self.configuration.get('producer'):
-						data['produced'] += 1
+				if match != None:
+					info = {'date': match.group(1), 'producer': match.group(2) }
+					date = parse(info["date"])
+					offset = -self.configuration.get('timezone_offset') * 3600 if self.configuration.get('timezone_offset') else 0
+					date = date+relativedelta(seconds=offset)
+				    	#pdb.set_trace()			
+					# filtering entries for the last 126 seconds
+					if date > last and date < now or date == now:
+						search.append(info)
+						if info['producer'] == self.configuration.get('producer'):
+							data['produced'] += 1
 		
 		return data
         except (ValueError, AttributeError):
